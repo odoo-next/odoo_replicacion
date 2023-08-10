@@ -55,6 +55,7 @@ def create_backup():
     backup_dir = data['backup_dir']
     databases_to_backup = data['databases_to_backup']
     server_origin = data['local_url']
+    server_origin=server_origin+"/web/database/backup"
 
     try:
         # Ejecutar el comando CURL para respaldar la base de datos
