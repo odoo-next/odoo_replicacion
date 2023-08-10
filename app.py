@@ -9,21 +9,24 @@ import logging
 app = Flask(__name__)
 
 # Configuración de registro
-logging.basicConfig(filename='backup_log.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='backup_log.log', level=logging.ERROR,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 @app.route('/')
 def index():
     backups = get_backups_list()
     return render_template('index.html', backups=backups)
 
+
 @app.route('/restore/<backup_file>')
 def restore(backup_file):
-    data =load_config()
-    remote_odoo_url=data['server_url']
-    admin_password=data['admin_password']
+    data = load_config()
+    remote_odoo_url = data['server_url']
+    admin_password = data['admin_password']
 
     restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name=db3' {remote_odoo_url}/web/database/restore"
-    
+
     try:
         subprocess.run(restore_command, shell=True, check=True)
         return "Restauración iniciada con éxito."
@@ -32,19 +35,21 @@ def restore(backup_file):
         logging.error(error_message)
         return f"Error al restaurar la base de datos: {e}"
 
+
 def get_backups_list():
-    data =load_config()
-    backup_dir=data['backup_dir']
+    data = load_config()
+    backup_dir = data['backup_dir']
     backup_files = glob.glob(f"{backup_dir}/*.zip")
     return [os.path.basename(file) for file in backup_files]
 
+
 @app.route('/create_backup/')
 def create_backup():
-    data =load_config()
-    admin_password=data['admin_password']
-    backup_dir=data['backup_dir']
-    databases_to_backup=data['databases_to_backup']
-    server_origin=data['local_url']
+    data = load_config()
+    admin_password = data['admin_password']
+    backup_dir = data['backup_dir']
+    databases_to_backup = data['databases_to_backup']
+    server_origin = data['local_url']
 
     try:
         # Ejecutar el comando CURL para respaldar la base de datos
@@ -52,27 +57,26 @@ def create_backup():
         subprocess.run(backup_command, shell=True, check=True)
 
         # Eliminar los respaldos antiguos, manteniendo solo los 3 más recientes
-        backup_files = glob.glob(f"{backup_dir}/{databases_to_backup}_backup_*.zip")
+        backup_files = glob.glob(
+            f"{backup_dir}/{databases_to_backup}_backup_*.zip")
         backup_files.sort(key=os.path.getctime, reverse=True)
         for old_backup in backup_files[3:]:
-                if os.path.exists(old_backup):
-                    os.remove(old_backup)
+            if os.path.exists(old_backup):
+                os.remove(old_backup)
         return "Respaldo creado exitosamente."
     except subprocess.CalledProcessError as e:
-            error_message = f"Error al respaldar la base de datos {databases_to_backup}: {e}"
-            logging.error(error_message)
-            return f"Error al respaldar la base de datos {databases_to_backup}: {e}"
-            
+        error_message = f"Error al respaldar la base de datos {databases_to_backup}: {e}"
+        logging.error(error_message)
+        return f"Error al respaldar la base de datos {databases_to_backup}: {e}"
 
 
 @app.route('/copy_folder')
 def copy_folder():
-    data =load_config()
-    remote_folder=data['server_folder']
-    local_folder=data['local_folder']
-    server_user=data['server_user']
-    server_ip=data['server_ip']
-    
+    data = load_config()
+    remote_folder = data['server_folder']
+    local_folder = data['local_folder']
+    server_user = data['server_user']
+    server_ip = data['server_ip']
 
     rsync_command = f"rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}"
     try:
@@ -82,7 +86,8 @@ def copy_folder():
         error_message = f"Error al copiar la carpeta: {e}"
         logging.error(error_message)
         return f"Error al copiar la carpeta: {e}"
-    
+
+
 def load_config(config_file='config.ini'):
     config = configparser.ConfigParser()
 
@@ -102,6 +107,7 @@ def load_config(config_file='config.ini'):
         return data
     except configparser.Error as e:
         raise ValueError(f"Error al cargar la configuración: {e}")
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
