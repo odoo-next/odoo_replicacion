@@ -29,22 +29,22 @@ def restore(backup_file):
     data = load_config()
     remote_odoo_url = data['server_url']
     admin_password = data['admin_password']
-
+    backup_dir = data['backup_dir']
+    backup_file=backup_dir+"/"+backup_file
     restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name=db3' {remote_odoo_url}/web/database/restore"
-
     try:
         subprocess.run(restore_command, shell=True, check=True)
-        return "Restauración iniciada con éxito."
+        return redirect(url_for('index', message="Restauración iniciada con éxito."))
     except subprocess.CalledProcessError as e:
         error_message = f"Error al restaurar la base de datos: {e}"
         logging.error(error_message)
-        return f"Error al restaurar la base de datos: {e}"
+        return redirect(url_for('index', message=f"Error al restaurar la base de datos: {e}"))
 
 
 def get_backups_list():
     data = load_config()
     backup_dir = data['backup_dir']
-    backup_files = glob.glob(f"{backup_dir}/*.zip")
+    backup_files = glob.glob(f"{backup_dir}/*.dump")
     return [os.path.basename(file) for file in backup_files]
 
 
@@ -59,12 +59,12 @@ def create_backup():
 
     try:
         # Ejecutar el comando CURL para respaldar la base de datos
-        backup_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={databases_to_backup}' -F 'backup_format=dump' -o {backup_dir}/{databases_to_backup}_backup_{datetime.now().strftime('%Y%m%d%H%M%S')}.zip {server_origin}"
+        backup_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={databases_to_backup}' -F 'backup_format=dump' -o {backup_dir}/{databases_to_backup}_backup_{datetime.now().strftime('%Y%m%d%H%M%S')}.dump {server_origin}"
         subprocess.run(backup_command, shell=True, check=True)
 
         # Eliminar los respaldos antiguos, manteniendo solo los 3 más recientes
         backup_files = glob.glob(
-            f"{backup_dir}/{databases_to_backup}_backup_*.zip")
+            f"{backup_dir}/{databases_to_backup}_backup_*.dump")
         backup_files.sort(key=os.path.getctime, reverse=True)
         for old_backup in backup_files[3:]:
             if os.path.exists(old_backup):
