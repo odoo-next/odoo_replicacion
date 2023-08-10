@@ -107,6 +107,41 @@ def download_backup(backup_file):
     return send_file(f"{backup_dir}/{backup_file}", as_attachment=True)
 
 
+
+
+@app.route('/restart_odoo')
+def restart_odoo():
+    try:
+        subprocess.run(['sudo', 'service', 'odoo-server', 'restart'], check=True)
+        return redirect(url_for('index', message="Odoo reiniciado exitosamente."))
+    except subprocess.CalledProcessError as e:
+        error_message = f"Error al reiniciar Odoo: {e}"
+        logging.error(error_message)
+        return redirect(url_for('index', error_message=error_message))
+
+
+@app.route('/stop_odoo')
+def stop_odoo():
+    try:
+        subprocess.run(['sudo', 'service', 'odoo-server', 'stop'], check=True)
+        return redirect(url_for('index', message="Odoo detenido exitosamente."))
+    except subprocess.CalledProcessError as e:
+        error_message = f"Error al detener Odoo: {e}"
+        logging.error(error_message)
+        return redirect(url_for('index', error_message=error_message))
+
+
+@app.route('/start_odoo')
+def start_odoo():
+    try:
+        subprocess.run(['sudo', 'service', 'odoo-server', 'start'], check=True)
+        return redirect(url_for('index', message="Odoo iniciado exitosamente."))
+    except subprocess.CalledProcessError as e:
+        error_message = f"Error al iniciar Odoo: {e}"
+        logging.error(error_message)
+        return redirect(url_for('index', error_message=error_message))
+
+
 def load_config(config_file='config.ini'):
     config = configparser.ConfigParser()
 

@@ -54,6 +54,12 @@
                 {% endfor %}
             </tbody>
         </table>
+        <h2 class="mb-3">Gestión de Odoo</h2>
+        <div>
+            <a href="{{ url_for('restart_odoo') }}" class="btn btn-danger me-2">Reiniciar Odoo</a>
+            <a href="{{ url_for('stop_odoo') }}" class="btn btn-warning me-2">Detener Odoo</a>
+            <a href="{{ url_for('start_odoo') }}" class="btn btn-success">Iniciar Odoo</a>
+        </div>
     </div>
 </body>
 </html>
