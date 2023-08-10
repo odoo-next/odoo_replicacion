@@ -30,7 +30,8 @@ def restore(backup_file):
     admin_password = data['admin_password']
     backup_dir = data['backup_dir']
     backup_file = backup_dir+"/"+backup_file
-    restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name=db3' {remote_odoo_url}/web/database/restore"
+    nameDB = data['name_database']
+    restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={nameDB}' {remote_odoo_url}/web/database/restore"
     try:
         subprocess.run(restore_command, shell=True, check=True)
         return redirect(url_for('index', message="Restauración iniciada con éxito."))
@@ -115,6 +116,7 @@ def load_config(config_file='config.ini'):
             'server_user': config.get('Server', 'ServerUser'),
             'server_ip': config.get('Server', 'ServerIP'),
             'server_folder': config.get('Server', 'ServerFolder'),
+            'name_database': config.get('Server', 'NameDataBase'),
         }
         return data
     except configparser.Error as e:
