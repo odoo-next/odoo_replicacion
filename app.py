@@ -55,7 +55,9 @@ def create_backup():
         backup_files = glob.glob(f"{backup_dir}/{databases_to_backup}_backup_*.zip")
         backup_files.sort(key=os.path.getctime, reverse=True)
         for old_backup in backup_files[3:]:
-                os.remove(old_backup)
+                if os.path.exists(old_backup):
+                    os.remove(old_backup)
+        return "Respaldo creado exitosamente."
     except subprocess.CalledProcessError as e:
             error_message = f"Error al respaldar la base de datos {databases_to_backup}: {e}"
             logging.error(error_message)
@@ -102,4 +104,4 @@ def load_config(config_file='config.ini'):
         raise ValueError(f"Error al cargar la configuración: {e}")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='127.0.0.1', debug=True)
