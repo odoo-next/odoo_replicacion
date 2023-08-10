@@ -84,15 +84,17 @@ def copy_folder():
     local_folder = data['local_folder']
     server_user = data['server_user']
     server_ip = data['server_ip']
-
+    logging.info(f"Se copiará la carpeta {remote_folder} desde el servidor {server_ip} al directorio {local_folder}")
+    logging.info(f"Comando a ejecutar: rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}")
+    print(f"Comando a ejecutar: rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}")
     rsync_command = f"rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}"
     try:
         subprocess.run(rsync_command, shell=True, check=True)
-        return "Carpeta copiada exitosamente."
+        return redirect(url_for('index', message= "Carpeta copiada exitosamente."))
     except subprocess.CalledProcessError as e:
         error_message = f"Error al copiar la carpeta: {e}"
         logging.error(error_message)
-        return f"Error al copiar la carpeta: {e}"
+        return redirect(url_for('index', message=f"Error al copiar la carpeta: {e}"))
 
 
 @app.route('/download_backup/<backup_file>')
