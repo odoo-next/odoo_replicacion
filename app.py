@@ -110,4 +110,8 @@ def load_config(config_file='config.ini'):
 
 
 if __name__ == '__main__':
+    data=load_config()
+    backup_dir = data['backup_dir']
+    if not os.path.exists(backup_dir):
+        os.makedirs(backup_dir)
     app.run(host='0.0.0.0', debug=True)
