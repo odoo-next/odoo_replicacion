@@ -41,6 +41,7 @@ def restore(backup_file):
         return redirect(url_for('index', message=f"Error al restaurar la base de datos: {e}"))
 
 
+
 def get_backups_list():
     data = load_config()
     backup_dir = data['backup_dir']
