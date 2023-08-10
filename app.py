@@ -23,14 +23,13 @@ def index():
     return render_template('index.html', backups=backups, message=message, error_message=error_message)
 
 
-
 @app.route('/restore/<backup_file>')
 def restore(backup_file):
     data = load_config()
     remote_odoo_url = data['server_url']
     admin_password = data['admin_password']
     backup_dir = data['backup_dir']
-    backup_file=backup_dir+"/"+backup_file
+    backup_file = backup_dir+"/"+backup_file
     restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name=db3' {remote_odoo_url}/web/database/restore"
     try:
         subprocess.run(restore_command, shell=True, check=True)
@@ -55,7 +54,7 @@ def create_backup():
     backup_dir = data['backup_dir']
     databases_to_backup = data['databases_to_backup']
     server_origin = data['local_url']
-    server_origin=server_origin+"/web/database/backup"
+    server_origin = server_origin+"/web/database/backup"
 
     try:
         # Ejecutar el comando CURL para respaldar la base de datos
@@ -92,7 +91,8 @@ def copy_folder():
         error_message = f"Error al copiar la carpeta: {e}"
         logging.error(error_message)
         return f"Error al copiar la carpeta: {e}"
-    
+
+
 @app.route('/download_backup/<backup_file>')
 def download_backup(backup_file):
     data = load_config()
@@ -122,7 +122,7 @@ def load_config(config_file='config.ini'):
 
 
 if __name__ == '__main__':
-    data=load_config()
+    data = load_config()
     backup_dir = data['backup_dir']
     if not os.path.exists(backup_dir):
         os.makedirs(backup_dir)
