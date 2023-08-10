@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from flask import send_file
 import subprocess
 import configparser
 import os
@@ -86,6 +87,12 @@ def copy_folder():
         error_message = f"Error al copiar la carpeta: {e}"
         logging.error(error_message)
         return f"Error al copiar la carpeta: {e}"
+    
+@app.route('/download_backup/<backup_file>')
+def download_backup(backup_file):
+    data = load_config()
+    backup_dir = data['backup_dir']
+    return send_file(f"{backup_dir}/{backup_file}", as_attachment=True)
 
 
 def load_config(config_file='config.ini'):
