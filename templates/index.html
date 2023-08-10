@@ -3,9 +3,27 @@
 <head>
     <title>Backups de Odoo</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        h1 {
+            color: #343a40;
+        }
+        .btn {
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
+    <div class="container">
         {% if message %}
             <div class="alert alert-success mt-3">{{ message }}</div>
         {% endif %}
@@ -21,16 +39,17 @@
             <thead>
                 <tr>
                     <th>Archivo de Backup</th>
-                    <th>Descargar</th>
-                    <th>Restaurar</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 {% for backup in backups %}
                     <tr>
                         <td>{{ backup }}</td>
-                        <td><a href="{{ url_for('download_backup', backup_file=backup) }}" class="btn btn-info">Descargar</a></td>
-                        <td><a href="{{ url_for('restore', backup_file=backup) }}" class="btn btn-info">Restaurar</a></td>
+                        <td>
+                            <a href="{{ url_for('download_backup', backup_file=backup) }}" class="btn btn-info btn-sm me-2">Descargar</a>
+                            <a href="{{ url_for('restore', backup_file=backup) }}" class="btn btn-info btn-sm">Restaurar</a>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
