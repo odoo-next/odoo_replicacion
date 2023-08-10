@@ -26,12 +26,12 @@ def index():
 @app.route('/restore/<backup_file>')
 def restore(backup_file):
     data = load_config()
-    remote_odoo_url = data['server_url']
+    local_url = data['local_url']
     admin_password = data['admin_password']
     backup_dir = data['backup_dir']
     backup_file = backup_dir+"/"+backup_file
     nameDB = data['name_database']
-    restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={nameDB}' {remote_odoo_url}/web/database/restore"
+    restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={nameDB}' {local_url}/web/database/restore"
     try:
         subprocess.run(restore_command, shell=True, check=True)
         return redirect(url_for('index', message="Restauración iniciada con éxito."))
@@ -54,7 +54,7 @@ def create_backup():
     admin_password = data['admin_password']
     backup_dir = data['backup_dir']
     databases_to_backup = data['databases_to_backup']
-    server_origin = data['local_url']
+    server_origin = data['server_url']
     server_origin = server_origin+"/web/database/backup"
 
     try:
