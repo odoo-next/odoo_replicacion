@@ -6,6 +6,13 @@
 </head>
 <body>
     <div class="container mt-4">
+        {% if message %}
+            <div class="alert alert-success mt-3">{{ message }}</div>
+        {% endif %}
+        
+        {% if error_message %}
+            <div class="alert alert-danger mt-3">{{ error_message }}</div>
+        {% endif %}
         <a href="{{ url_for('copy_folder') }}" class="btn btn-primary mb-3">Copiar Carpeta Remota</a>
         <a href="{{ url_for('create_backup') }}" class="btn btn-success mb-3">Crear Backup</a>
         

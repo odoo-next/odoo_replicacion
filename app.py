@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 from flask import send_file
+from flask import redirect, url_for
 import subprocess
 import configparser
 import os
@@ -17,7 +18,10 @@ logging.basicConfig(filename='backup_log.log', level=logging.ERROR,
 @app.route('/')
 def index():
     backups = get_backups_list()
-    return render_template('index.html', backups=backups)
+    message = request.args.get('message', None)
+    error_message = request.args.get('error_message', None)
+    return render_template('index.html', backups=backups, message=message, error_message=error_message)
+
 
 
 @app.route('/restore/<backup_file>')
@@ -64,11 +68,11 @@ def create_backup():
         for old_backup in backup_files[3:]:
             if os.path.exists(old_backup):
                 os.remove(old_backup)
-        return "Respaldo creado exitosamente."
+        return redirect(url_for('index', message='Se ha creado correctamente el backup'))
     except subprocess.CalledProcessError as e:
         error_message = f"Error al respaldar la base de datos {databases_to_backup}: {e}"
         logging.error(error_message)
-        return f"Error al respaldar la base de datos {databases_to_backup}: {e}"
+        return redirect(url_for('index', error_message=f"Error al respaldar la base de datos {databases_to_backup}: {e}"))
 
 
 @app.route('/copy_folder')
