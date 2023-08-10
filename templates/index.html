@@ -3,6 +3,7 @@
 <head>
     <title>Backups de Odoo</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -30,9 +31,8 @@
         
         {% if error_message %}
             <div class="alert alert-danger mt-3">{{ error_message }}</div>
-        {% endif %}
-        <a href="{{ url_for('copy_folder') }}" class="btn btn-primary mb-3">Copiar Carpeta Remota</a>
-        <a href="{{ url_for('create_backup') }}" class="btn btn-success mb-3">Crear Backup</a>
+        {% endif %}       
+        <a href="{{ url_for('create_backup') }}" class="btn btn-success mb-3"><i class="bi bi-cloud-upload"></i> Crear Backup</a>
         
         <h1 class="mb-3">Backups Disponibles</h1>
         <table class="table">
@@ -47,18 +47,19 @@
                     <tr>
                         <td>{{ backup }}</td>
                         <td>
-                            <a href="{{ url_for('download_backup', backup_file=backup) }}" class="btn btn-info btn-sm me-2">Descargar</a>
-                            <a href="{{ url_for('restore', backup_file=backup) }}" class="btn btn-info btn-sm">Restaurar</a>
+                            <a href="{{ url_for('download_backup', backup_file=backup) }}" class="btn btn-info btn-sm me-2"><i class="bi bi-cloud-download"></i> Descargar</a>
+                            <a href="{{ url_for('restore', backup_file=backup) }}" class="btn btn-info btn-sm"><i class="bi bi-box-arrow-in-down"></i> Restaurar</a>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+        
         <h2 class="mb-3">Gestión de Odoo</h2>
         <div>
-            <a href="{{ url_for('restart_odoo') }}" class="btn btn-danger me-2">Reiniciar Odoo</a>
-            <a href="{{ url_for('stop_odoo') }}" class="btn btn-warning me-2">Detener Odoo</a>
-            <a href="{{ url_for('start_odoo') }}" class="btn btn-success">Iniciar Odoo</a>
+            <a href="{{ url_for('restart_odoo') }}" class="btn btn-danger me-2"><i class="bi bi-arrow-repeat"></i> Reiniciar Odoo</a>
+            <a href="{{ url_for('stop_odoo') }}" class="btn btn-warning me-2"><i class="bi bi-stop"></i> Detener Odoo</a>
+            <a href="{{ url_for('start_odoo') }}" class="btn btn-success"><i class="bi bi-play"></i> Iniciar Odoo</a>
         </div>
     </div>
 </body>

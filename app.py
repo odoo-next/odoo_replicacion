@@ -34,6 +34,8 @@ def restore(backup_file):
     restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={nameDB}' {local_url}/web/database/restore"
     try:
         subprocess.run(restore_command, shell=True, check=True)
+        #copy_folder
+        copy_folder()
         return redirect(url_for('index', message="Restauración iniciada con éxito."))
     except subprocess.CalledProcessError as e:
         error_message = f"Error al restaurar la base de datos: {e}"
@@ -77,7 +79,6 @@ def create_backup():
         return redirect(url_for('index', error_message=f"Error al respaldar la base de datos {databases_to_backup}: {e}"))
 
 
-@app.route('/copy_folder')
 def copy_folder():
     data = load_config()
     remote_folder = data['server_folder']
