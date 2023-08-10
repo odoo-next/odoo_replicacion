@@ -48,7 +48,17 @@ def get_backups_list():
     data = load_config()
     backup_dir = data['backup_dir']
     backup_files = glob.glob(f"{backup_dir}/*.dump")
-    return [os.path.basename(file) for file in backup_files]
+    
+    backups = []
+    for file in backup_files:
+        backup_name = os.path.basename(file)
+        backup_date = get_backup_creation_date(file)  # Nueva función
+        backups.append({'name': backup_name, 'date': backup_date})
+    
+    return backups
+
+def get_backup_creation_date(backup_file):
+    return datetime.fromtimestamp(os.path.getctime(backup_file)).strftime('%Y-%m-%d %H:%M:%S')
 
 
 @app.route('/create_backup/')
