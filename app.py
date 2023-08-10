@@ -31,6 +31,16 @@ def restore(backup_file):
     backup_dir = data['backup_dir']
     backup_file = backup_dir+"/"+backup_file
     nameDB = data['name_database']
+
+    drop_db_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={nameDB}' {local_url}/web/database/drop"
+    try:
+        subprocess.run(drop_db_command, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        error_message = f"Error al borrar la base de datos existente: {e}"
+        logging.error(error_message)
+        return redirect(url_for('index', message=error_message))
+
+
     restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={nameDB}' {local_url}/web/database/restore"
     try:
         subprocess.run(restore_command, shell=True, check=True)
