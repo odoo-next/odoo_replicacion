@@ -90,6 +90,9 @@ def copy_folder():
     rsync_command = f"rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}"
     try:
         subprocess.run(rsync_command, shell=True, check=True)
+        #sudo chown -R oodoo:odoo /odoo/.local/share
+        chown_command = f"sudo chown -R odoo:odoo {local_folder}"
+        subprocess.run(chown_command, shell=True, check=True)
         return redirect(url_for('index', message= "Carpeta copiada exitosamente."))
     except subprocess.CalledProcessError as e:
         error_message = f"Error al copiar la carpeta: {e}"
