@@ -7,7 +7,7 @@ import os
 import glob
 from datetime import datetime
 import logging
-
+import shutil
 app = Flask(__name__)
 
 # Configuración de registro
@@ -154,12 +154,34 @@ def rename_local_folder(rename_to_backup=False):
         try:
             os.rename(local_folder + "/" + name_database, new_folder_name)
         except Exception as e:
-            logging.error("Ha ocurrido un error al renombrar la carpeta {e}")
+            logging.error(f"Ha ocurrido un error al renombrar la carpeta: {e}")
+        
+        if os.path.exists(new_folder_name) and os.path.exists(local_folder + "/" + name_database):
+            # Realizar la fusión de carpetas si ambas existen
+            merge_folders(local_folder + "/" + name_database, new_folder_name)
+
         return new_folder_name
     except OSError as e:
         error_message = f"Error al renombrar la carpeta: {e}"
         logging.error(error_message)
         raise ValueError(error_message)
+
+def merge_folders(source_folder, destination_folder):
+    for item in os.listdir(source_folder):
+        source_item = os.path.join(source_folder, item)
+        destination_item = os.path.join(destination_folder, item)
+        
+        if os.path.exists(destination_item):
+            if os.path.isdir(source_item):
+                merge_folders(source_item, destination_item)
+            else:
+                # Renombrar el archivo en conflicto antes de copiarlo
+                renamed_item = os.path.join(destination_folder, 'conflict_' + item)
+                os.rename(destination_item, renamed_item)
+                shutil.move(source_item, destination_item)
+        else:
+            shutil.move(source_item, destination_item)
+
 
 
 def get_backups_list():
