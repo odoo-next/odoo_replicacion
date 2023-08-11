@@ -22,6 +22,13 @@
             font-size: 14px;
         }
     </style>
+    <script>
+        function confirmAction(actionUrl, message) {
+            if (confirm(message)) {
+                window.location.href = actionUrl;
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -49,19 +56,21 @@
                         <td>{{ backup.name }}</td>
                         <td>{{ backup.date }}</td>
                         <td>
-                            <a href="{{ url_for('download_backup', backup_file=backup.name) }}" class="btn btn-info btn-sm me-2"><i class="bi bi-cloud-download"></i> Descargar</a>
-                            <a href="{{ url_for('restore', backup_file=backup.name) }}" class="btn btn-info btn-sm"><i class="bi bi-box-arrow-in-down"></i> Restaurar</a>
+                            <a href="javascript:void(0);" class="btn btn-info btn-sm me-2" onclick="confirmAction('{{ url_for('download_backup', backup_file=backup.name) }}', '¿Estás seguro de que deseas descargar este archivo?')"><i class="bi bi-cloud-download"></i> Descargar</a>
+                            <a href="javascript:void(0);" class="btn btn-info btn-sm" onclick="confirmAction('{{ url_for('restore', backup_file=backup.name) }}', '¿Estás seguro de que deseas restaurar esta base de datos? Esto eliminará la base de datos actual.')"><i class="bi bi-box-arrow-in-down"></i> Restaurar</a>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
         
-        <h2 class="mb-3">Gestión de Odoo</h2>
-        <div>
-            <a href="{{ url_for('restart_odoo') }}" class="btn btn-danger me-2"><i class="bi bi-arrow-repeat"></i> Reiniciar Odoo</a>
-            <a href="{{ url_for('stop_odoo') }}" class="btn btn-warning me-2"><i class="bi bi-stop"></i> Detener Odoo</a>
-            <a href="{{ url_for('start_odoo') }}" class="btn btn-success"><i class="bi bi-play"></i> Iniciar Odoo</a>
+        <div class="mt-4 p-3 border rounded">
+            <h2 class="mb-3">Gestión de Odoo</h2>
+            <div>
+                <a href="javascript:void(0);" class="btn btn-danger me-2" onclick="confirmAction('{{ url_for('restart_odoo') }}', '¿Estás seguro de que deseas reiniciar Odoo?')"><i class="bi bi-arrow-repeat"></i> Reiniciar Odoo</a>
+                <a href="javascript:void(0);" class="btn btn-warning me-2" onclick="confirmAction('{{ url_for('stop_odoo') }}', '¿Estás seguro de que deseas detener Odoo?')"><i class="bi bi-stop"></i> Detener Odoo</a>
+                <a href="javascript:void(0);" class="btn btn-success" onclick="confirmAction('{{ url_for('start_odoo') }}', '¿Estás seguro de que deseas iniciar Odoo?')"><i class="bi bi-play"></i> Iniciar Odoo</a>
+            </div>
         </div>
     </div>
 </body>
