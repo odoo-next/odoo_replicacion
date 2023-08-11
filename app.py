@@ -143,12 +143,80 @@ def start_odoo():
         error_message = f"Error al iniciar Odoo: {e}"
         logging.error(error_message)
         return redirect(url_for('index', error_message=error_message))
+    
+
+@app.route('/sync_modulos')
+@auth.login_required
+def sync_modulos():
+    try:
+        subprocess.run(['rsync', '-avz', '--delete', 'server_user@server_ip:/odoo/Modulos/', '/ruta/de/backups/odoo/Modulos/'], check=True)
+        return redirect(url_for('index', message="Sincronización de módulos exitosa."))
+    except subprocess.CalledProcessError as e:
+        error_message = f"Error al sincronizar módulos: {e}"
+        logging.error(error_message)
+        return redirect(url_for('index', error_message=error_message))
+    
+
+@app.route('/create_snapshot/')
+@auth.login_required
+def create_snapshot():
+    data = load_config()
+    remote_paths = data['remote_snapshot_paths']
+    local_snapshot_dir = data['local_snapshot_dir']
+
+    try:
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        snapshot_name = f'snapshot_{timestamp}.zip'
+        snapshot_path = os.path.join(local_snapshot_dir, snapshot_name)
+
+        # Copiar archivos del servidor remoto al local
+        for remote_path in remote_paths:
+            rsync_command = f"rsync -avz --delete {data['server_user']}@{data['server_ip']}:{remote_path} {local_snapshot_dir}"
+            subprocess.run(rsync_command, shell=True, check=True)
+
+        # Comprimir los archivos en un archivo ZIP
+        shutil.make_archive(os.path.splitext(snapshot_path)[0], 'zip', local_snapshot_dir, snapshot_name)
+
+        # Eliminar archivos individuales copiados
+        for remote_path in remote_paths:
+            local_path = os.path.join(local_snapshot_dir, os.path.basename(remote_path))
+            if os.path.exists(local_path):
+                os.remove(local_path)
+
+        # Eliminar snapshots antiguos
+        snapshots = get_snapshots_list(local_snapshot_dir)
+        if len(snapshots) > 2:
+            oldest_snapshot = snapshots[-1]
+            os.remove(os.path.join(local_snapshot_dir, oldest_snapshot['name']))
+
+        return redirect(url_for('index', message='Snapshot creado exitosamente.'))
+    except subprocess.CalledProcessError as e:
+        error_message = f"Error al crear el snapshot: {e}"
+        logging.error(error_message)
+        return redirect(url_for('index', error_message=error_message))
+
+
+
 
 
 """
 Metodos Auxiliares
 """
 
+def get_snapshots_list(local_snapshot_dir):
+    snapshot_files = glob.glob(os.path.join(local_snapshot_dir, 'snapshot_*.zip'))
+
+    snapshots = []
+    for file in snapshot_files:
+        snapshot_name = os.path.basename(file)
+        snapshot_date = get_snapshot_creation_date(file)
+        snapshots.append({'name': snapshot_name, 'date': snapshot_date})
+
+    sorted_snapshots = sorted(snapshots, key=lambda x: x['date'], reverse=True)
+    return sorted_snapshots
+
+def get_snapshot_creation_date(snapshot_file):
+    return datetime.fromtimestamp(os.path.getctime(snapshot_file)).strftime('%Y-%m-%d %H:%M:%S')
 
 def rename_local_folder(rename_to_backup=False):
     data = load_config()

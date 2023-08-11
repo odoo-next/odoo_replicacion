@@ -114,6 +114,16 @@
                 {% endfor %}
             </tbody>
         </table>
+        <div class="mt-4 p-3 border rounded">
+            <h2 class="mb-3">Sincronizar Módulos</h2>
+            <div>
+                <a href="javascript:void(0);" class="btn btn-primary" id="syncModulosBtn"
+                    onclick="confirmActionWithLoader('{{ url_for('sync_modulos') }}', '¿Estás seguro de que deseas sincronizar los módulos?', 'syncModulosBtn', 'bi bi-sync')"><i
+                        class="bi bi-sync"></i> Sincronizar Módulos</a>
+            </div>
+        </div>
+
+
 
         <div class="mt-4 p-3 border rounded">
             <h2 class="mb-3">Gestión de Odoo</h2>
@@ -129,6 +139,35 @@
                         class="bi bi-play"></i> Iniciar Odoo</a>
             </div>
         </div>
+
+
+        <div class="mt-4 p-3 border rounded">
+            <h2 class="mb-3">Crear Snapshot</h2>
+            <div>
+                <a href="{{ url_for('create_snapshot') }}" class="btn btn-warning" id="createSnapshotBtn"
+                    onclick="return confirm('¿Estás seguro de que deseas crear un snapshot?')">
+                    <i class="bi bi-camera"></i> Crear Snapshot
+                </a>
+            </div>
+        </div>
+        
+        <h2 class="mt-4">Snapshots Disponibles</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Snapshot</th>
+                    <th>Fecha de Creación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for snapshot in snapshots %}
+                <tr>
+                    <td><a href="{{ url_for('download_snapshot', snapshot_file=snapshot.name) }}">{{ snapshot.name }}</a></td>
+                    <td>{{ snapshot.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </body>
 
