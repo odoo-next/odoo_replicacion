@@ -19,6 +19,7 @@ logging.basicConfig(filename='backup_log.log', level=logging.ERROR,
 Routas de la aplicación
 """
 
+
 @app.route('/')
 def index():
     backups = get_backups_list()
@@ -39,17 +40,19 @@ def restore(backup_file):
     print("Renobrado el filestore a filestore_backup")
     # Eliminar la base de datos
     drop_db_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={nameDB}' {local_url}/web/database/drop"
-    print(f"Eliminando la base de datos {nameDB} con  el comando: {drop_db_command}")
+    print(
+        f"Eliminando la base de datos {nameDB} con  el comando: {drop_db_command}")
     subprocess.run(drop_db_command, shell=True, check=True)
 
-
-    restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={nameDB}' {local_url}/web/database/restore"   
+    restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={nameDB}' {local_url}/web/database/restore"
 
     try:
-        print(f"Restaurando la base de datos {nameDB} con el comando: {restore_command}")
+        print(
+            f"Restaurando la base de datos {nameDB} con el comando: {restore_command}")
         subprocess.run(restore_command, shell=True, check=True)
         print("Renobrado el filestore a filestore al nombre original")
-        rename_local_folder(rename_to_backup=False)  # Renombrar después de restaurar y evitar traerme de vuelta todos los archivos del filestore
+        # Renombrar después de restaurar y evitar traerme de vuelta todos los archivos del filestore
+        rename_local_folder(rename_to_backup=False)
         print("Copiar la carpeta filestore_ del servidor remoto al servidor local")
         copy_folder()
         return redirect(url_for('index', message="Restauración iniciada con éxito."))
@@ -57,9 +60,6 @@ def restore(backup_file):
         error_message = f"Error al restaurar la base de datos: {e}"
         logging.error(error_message)
         return redirect(url_for('index', message=f"Error al restaurar la base de datos: {e}"))
-
-
-
 
 
 @app.route('/create_backup/')
@@ -91,7 +91,6 @@ def create_backup():
         return redirect(url_for('index', error_message=f"Error al respaldar la base de datos {databases_to_backup}: {e}"))
 
 
-
 @app.route('/download_backup/<backup_file>')
 def download_backup(backup_file):
     data = load_config()
@@ -99,12 +98,11 @@ def download_backup(backup_file):
     return send_file(f"{backup_dir}/{backup_file}", as_attachment=True)
 
 
-
-
 @app.route('/restart_odoo')
 def restart_odoo():
     try:
-        subprocess.run(['sudo', 'service', 'odoo-server', 'restart'], check=True)
+        subprocess.run(
+            ['sudo', 'service', 'odoo-server', 'restart'], check=True)
         return redirect(url_for('index', message="Odoo reiniciado exitosamente."))
     except subprocess.CalledProcessError as e:
         error_message = f"Error al reiniciar Odoo: {e}"
@@ -134,10 +132,10 @@ def start_odoo():
         return redirect(url_for('index', error_message=error_message))
 
 
-
 """
 Metodos Auxiliares
 """
+
 
 def rename_local_folder(rename_to_backup=False):
     data = load_config()
@@ -155,7 +153,7 @@ def rename_local_folder(rename_to_backup=False):
             os.rename(local_folder + "/" + name_database, new_folder_name)
         except Exception as e:
             logging.error(f"Ha ocurrido un error al renombrar la carpeta: {e}")
-        
+
         if os.path.exists(new_folder_name) and os.path.exists(local_folder + "/" + name_database):
             # Realizar la fusión de carpetas si ambas existen
             merge_folders(local_folder + "/" + name_database, new_folder_name)
@@ -166,37 +164,46 @@ def rename_local_folder(rename_to_backup=False):
         logging.error(error_message)
         raise ValueError(error_message)
 
+
 def merge_folders(source_folder, destination_folder):
     for item in os.listdir(source_folder):
         source_item = os.path.join(source_folder, item)
         destination_item = os.path.join(destination_folder, item)
-        
-        if os.path.exists(destination_item):
-            if os.path.isdir(source_item):
-                merge_folders(source_item, destination_item)
-            else:
-                # Mover el archivo en conflicto antes de copiarlo
-                shutil.move(source_item, destination_folder)
+
+        # Si el item es un archivo y no existe en el destino, copiarlo
+        if os.path.isfile(source_item) and not os.path.exists(destination_item):
+            shutil.copy2(source_item, destination_item)
+            print(f"Copiado: {item}")
+            os.remove(source_item)  # Borrar el archivo del origen
+            print(f"Borrado de origen: {item}")
         else:
-            shutil.move(source_item, destination_item)
+            print(
+                f"El archivo ya existe en destino o no es un archivo: {item}")
+
+        # Borrar la carpeta de origen
+    shutil.rmtree(source_folder)
+    print(f"Carpeta de origen borrada: {source_folder}")
+
 
 def get_backups_list():
     data = load_config()
     backup_dir = data['backup_dir']
     backup_files = glob.glob(f"{backup_dir}/*.dump")
-    
+
     backups = []
     for file in backup_files:
         backup_name = os.path.basename(file)
         backup_date = get_backup_creation_date(file)  # Nueva función
         backups.append({'name': backup_name, 'date': backup_date})
-    
+
     sorted_backups = sorted(backups, key=lambda x: x['date'], reverse=True)
-    
+
     return sorted_backups
+
 
 def get_backup_creation_date(backup_file):
     return datetime.fromtimestamp(os.path.getctime(backup_file)).strftime('%Y-%m-%d %H:%M:%S')
+
 
 def copy_folder():
     data = load_config()
@@ -204,20 +211,24 @@ def copy_folder():
     local_folder = data['local_folder']
     server_user = data['server_user']
     server_ip = data['server_ip']
-    print(f"Se copiará la carpeta {remote_folder} desde el servidor {server_ip} al directorio {local_folder}")
-    print(f"Comando a ejecutar: rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}")    
+    print(
+        f"Se copiará la carpeta {remote_folder} desde el servidor {server_ip} al directorio {local_folder}")
+    print(
+        f"Comando a ejecutar: rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}")
     rsync_command = f"rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}"
     try:
         subprocess.run(rsync_command, shell=True, check=True)
-        #sudo chown -R oodoo:odoo /odoo/.local/share
+        # sudo chown -R oodoo:odoo /odoo/.local/share
         chown_command = f"sudo chown -R odoo:odoo {local_folder}"
         subprocess.run(chown_command, shell=True, check=True)
-        print(f"Comando a ejecutar: rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}")
-        return redirect(url_for('index', message= "Carpeta copiada exitosamente."))
+        print(
+            f"Comando a ejecutar: rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}")
+        return redirect(url_for('index', message="Carpeta copiada exitosamente."))
     except subprocess.CalledProcessError as e:
         error_message = f"Error al copiar la carpeta: {e}"
         logging.error(error_message)
         return redirect(url_for('index', message=f"Error al copiar la carpeta: {e}"))
+
 
 def load_config(config_file='config.ini'):
     config = configparser.ConfigParser()
