@@ -142,25 +142,25 @@ def rename_local_folder(rename_to_backup=False):
     local_folder = data['local_folder']
     name_database = data['name_database']
     backup_suffix = '_bk'
-
-    if rename_to_backup:
-        new_folder_name = local_folder + "/" + name_database + backup_suffix
-    else:
-        new_folder_name = local_folder + "/" + name_database
-
     try:
-        try:
+        if rename_to_backup:
+            new_folder_name = local_folder + "/" + name_database + backup_suffix
+            #borrar la carpeta si existe
+            if os.path.exists(new_folder_name):
+                shutil.rmtree(new_folder_name)
             os.rename(local_folder + "/" + name_database, new_folder_name)
-        except Exception as e:
-            logging.error(f"Ha ocurrido un error al renombrar la carpeta: {e}")
-
-        if os.path.exists(new_folder_name) and os.path.exists(local_folder + "/" + name_database):
-            # Realizar la fusión de carpetas si ambas existen
-            merge_folders(local_folder + "/" + name_database, new_folder_name)
-
-        return new_folder_name
+            return new_folder_name
+        else:
+            new_folder_name = local_folder + "/" + name_database
+            try:
+                os.rename(local_folder + "/" + name_database, new_folder_name)   
+            except:
+                pass
+            merge_folders(new_folder_name + backup_suffix, new_folder_name)
+            shutil.rmtree(new_folder_name + backup_suffix)
+            return new_folder_name
     except OSError as e:
-        error_message = f"Error al renombrar la carpeta: {e}"
+        error_message = f"Error : {e}"
         logging.error(error_message)
         raise ValueError(error_message)
 
@@ -179,10 +179,6 @@ def merge_folders(source_folder, destination_folder):
         else:
             print(
                 f"El archivo ya existe en destino o no es un archivo: {item}")
-
-        # Borrar la carpeta de origen
-    shutil.rmtree(source_folder)
-    print(f"Carpeta de origen borrada: {source_folder}")
 
 
 def get_backups_list():
