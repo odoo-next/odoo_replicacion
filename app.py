@@ -146,7 +146,10 @@ def rename_local_folder(rename_to_backup=False):
         new_folder_name = local_folder + "/" + name_database
 
     try:
-        os.rename(local_folder + "/" + name_database, new_folder_name)
+        try:
+            os.rename(local_folder + "/" + name_database, new_folder_name)
+        except :
+            pass
         return new_folder_name
     except OSError as e:
         error_message = f"Error al renombrar la carpeta: {e}"
