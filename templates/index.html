@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Backups de Odoo</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
@@ -8,6 +9,7 @@
         body {
             background-color: #f8f9fa;
         }
+
         .container {
             background-color: #ffffff;
             border-radius: 10px;
@@ -15,9 +17,11 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-top: 50px;
         }
+
         h1 {
             color: #343a40;
         }
+
         .btn {
             font-size: 14px;
         }
@@ -26,9 +30,9 @@
         function confirmActionWithLoader(actionUrl, message, btnId, iconClass) {
             var btnElement = document.getElementById(btnId);
             var originalContent = btnElement.innerHTML;
-            
+
             btnElement.innerHTML = '<i class="' + iconClass + '"></i>'; // Cambiar el contenido por el icono de carga
-            
+
             if (confirm(message)) {
                 window.location.href = actionUrl;
             } else {
@@ -37,17 +41,20 @@
         }
     </script>
 </head>
+
 <body>
     <div class="container">
         {% if message %}
-            <div class="alert alert-success mt-3">{{ message }}</div>
+        <div class="alert alert-success mt-3">{{ message }}</div>
         {% endif %}
-        
+
         {% if error_message %}
-            <div class="alert alert-danger mt-3">{{ error_message }}</div>
-        {% endif %}       
-        <a href="javascript:void(0);" class="btn btn-success mb-3" onclick="confirmActionWithLoader('{{ url_for('create_backup') }}', '¿Estás seguro de que deseas crear un backup?', 'createBackupBtn', 'bi bi-cloud-upload')"><i class="bi bi-cloud-upload"></i> Crear Backup</a>
-        
+        <div class="alert alert-danger mt-3">{{ error_message }}</div>
+        {% endif %}
+        <a href="javascript:void(0);" class="btn btn-success mb-3"
+            onclick="confirmActionWithLoader('{{ url_for('create_backup') }}', '¿Estás seguro de que deseas crear un backup?', 'createBackupBtn', 'bi bi-cloud-upload')"><i
+                class="bi bi-cloud-upload"></i> Crear Backup</a>
+
         <h1 class="mb-3">Backups Disponibles</h1>
         <table class="table">
             <thead>
@@ -59,26 +66,38 @@
             </thead>
             <tbody>
                 {% for backup in backups %}
-                    <tr>
-                        <td>{{ backup.name }}</td>
-                        <td>{{ backup.date }}</td>
-                        <td>
-                            <a href="javascript:void(0);" class="btn btn-info btn-sm me-2" onclick="confirmActionWithLoader('{{ url_for('download_backup', backup_file=backup.name) }}', '¿Estás seguro de que deseas descargar este archivo?', 'downloadBackupBtn{{ loop.index }}', 'bi bi-cloud-download')"><i class="bi bi-cloud-download"></i> Descargar</a>
-                            <a href="javascript:void(0);" class="btn btn-info btn-sm" onclick="confirmActionWithLoader('{{ url_for('restore', backup_file=backup.name) }}', '¿Estás seguro de que deseas restaurar esta base de datos? Esto eliminará la base de datos actual.', 'restoreBackupBtn{{ loop.index }}', 'bi bi-box-arrow-in-down')"><i class="bi bi-box-arrow-in-down"></i> Restaurar</a>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>{{ backup.name }}</td>
+                    <td>{{ backup.date }}</td>
+                    <td>
+                        <a href="javascript:void(0);" class="btn btn-info btn-sm me-2"
+                            id="downloadBackupBtn{{ loop.index }}"
+                            onclick="confirmActionWithLoader('{{ url_for('download_backup', backup_file=backup.name) }}', '¿Estás seguro de que deseas descargar este archivo?', 'downloadBackupBtn{{ loop.index }}', 'bi bi-cloud-download')"><i
+                                class="bi bi-cloud-download"></i> Descargar</a>
+                        <a href="javascript:void(0);" class="btn btn-info btn-sm" id="restoreBackupBtn{{ loop.index }}"
+                            onclick="confirmActionWithLoader('{{ url_for('restore', backup_file=backup.name) }}', '¿Estás seguro de que deseas restaurar esta base de datos? Esto eliminará la base de datos actual.', 'restoreBackupBtn{{ loop.index }}', 'bi bi-box-arrow-in-down')"><i
+                                class="bi bi-box-arrow-in-down"></i> Restaurar</a>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
-        
+
         <div class="mt-4 p-3 border rounded">
             <h2 class="mb-3">Gestión de Odoo</h2>
             <div>
-                <a href="javascript:void(0);" class="btn btn-danger me-2" onclick="confirmActionWithLoader('{{ url_for('restart_odoo') }}', '¿Estás seguro de que deseas reiniciar Odoo?', 'restartOdooBtn', 'bi bi-arrow-repeat')"><i class="bi bi-arrow-repeat"></i> Reiniciar Odoo</a>
-                <a href="javascript:void(0);" class="btn btn-warning me-2" onclick="confirmActionWithLoader('{{ url_for('stop_odoo') }}', '¿Estás seguro de que deseas detener Odoo?', 'stopOdooBtn', 'bi bi-stop')"><i class="bi bi-stop"></i> Detener Odoo</a>
-                <a href="javascript:void(0);" class="btn btn-success" onclick="confirmActionWithLoader('{{ url_for('start_odoo') }}', '¿Estás seguro de que deseas iniciar Odoo?', 'startOdooBtn', 'bi bi-play')"><i class="bi bi-play"></i> Iniciar Odoo</a>
+                <a href="javascript:void(0);" class="btn btn-danger me-2"
+                    onclick="confirmActionWithLoader('{{ url_for('restart_odoo') }}', '¿Estás seguro de que deseas reiniciar Odoo?', 'restartOdooBtn', 'bi bi-arrow-repeat')"><i
+                        class="bi bi-arrow-repeat"></i> Reiniciar Odoo</a>
+                <a href="javascript:void(0);" class="btn btn-warning me-2"
+                    onclick="confirmActionWithLoader('{{ url_for('stop_odoo') }}', '¿Estás seguro de que deseas detener Odoo?', 'stopOdooBtn', 'bi bi-stop')"><i
+                        class="bi bi-stop"></i> Detener Odoo</a>
+                <a href="javascript:void(0);" class="btn btn-success"
+                    onclick="confirmActionWithLoader('{{ url_for('start_odoo') }}', '¿Estás seguro de que deseas iniciar Odoo?', 'startOdooBtn', 'bi bi-play')"><i
+                        class="bi bi-play"></i> Iniciar Odoo</a>
             </div>
         </div>
     </div>
 </body>
+
 </html>
