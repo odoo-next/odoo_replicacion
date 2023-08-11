@@ -65,7 +65,7 @@
         {% if error_message %}
         <div class="alert alert-danger mt-3">{{ error_message }}</div>
         {% endif %}
-        <a href="javascript:void(0);" class="btn btn-success mb-3"
+        <a href="javascript:void(0);" class="btn btn-success mb-3" id="createBackupBtn"
             onclick="confirmActionWithLoader('{{ url_for('create_backup') }}', '¿Estás seguro de que deseas crear un backup?', 'createBackupBtn', 'bi bi-cloud-upload')"><i
                 class="bi bi-cloud-upload"></i> Crear Backup</a>
 
@@ -100,13 +100,13 @@
         <div class="mt-4 p-3 border rounded">
             <h2 class="mb-3">Gestión de Odoo</h2>
             <div>
-                <a href="javascript:void(0);" class="btn btn-danger me-2"
+                <a href="javascript:void(0);" class="btn btn-danger me-2" id="restartOdooBtn"
                     onclick="confirmActionWithLoader('{{ url_for('restart_odoo') }}', '¿Estás seguro de que deseas reiniciar Odoo?', 'restartOdooBtn', 'bi bi-arrow-repeat')"><i
                         class="bi bi-arrow-repeat"></i> Reiniciar Odoo</a>
-                <a href="javascript:void(0);" class="btn btn-warning me-2"
+                <a href="javascript:void(0);" class="btn btn-warning me-2" id="stopOdooBtn"
                     onclick="confirmActionWithLoader('{{ url_for('stop_odoo') }}', '¿Estás seguro de que deseas detener Odoo?', 'stopOdooBtn', 'bi bi-stop')"><i
                         class="bi bi-stop"></i> Detener Odoo</a>
-                <a href="javascript:void(0);" class="btn btn-success"
+                <a href="javascript:void(0);" class="btn btn-success" id="startOdooBtn"
                     onclick="confirmActionWithLoader('{{ url_for('start_odoo') }}', '¿Estás seguro de que deseas iniciar Odoo?', 'startOdooBtn', 'bi bi-play')"><i
                         class="bi bi-play"></i> Iniciar Odoo</a>
             </div>
