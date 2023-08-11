@@ -175,14 +175,10 @@ def merge_folders(source_folder, destination_folder):
             if os.path.isdir(source_item):
                 merge_folders(source_item, destination_item)
             else:
-                # Renombrar el archivo en conflicto antes de copiarlo
-                renamed_item = os.path.join(destination_folder, 'conflict_' + item)
-                os.rename(destination_item, renamed_item)
-                shutil.move(source_item, destination_item)
+                # Mover el archivo en conflicto antes de copiarlo
+                shutil.move(source_item, destination_folder)
         else:
             shutil.move(source_item, destination_item)
-
-
 
 def get_backups_list():
     data = load_config()
