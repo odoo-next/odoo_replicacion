@@ -25,13 +25,27 @@
         .btn {
             font-size: 14px;
         }
+        .loader {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 2s linear infinite;
+            margin-right: 5px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
     <script>
         function confirmActionWithLoader(actionUrl, message, btnId, iconClass) {
             var btnElement = document.getElementById(btnId);
             var originalContent = btnElement.innerHTML;
 
-            btnElement.innerHTML = '<i class="' + iconClass + '"></i>'; // Cambiar el contenido por el icono de carga
+            btnElement.innerHTML = '<div class="loader"></div>'; // Agregar el loader al botón
 
             if (confirm(message)) {
                 window.location.href = actionUrl;
