@@ -8,19 +8,26 @@ import glob
 from datetime import datetime
 import logging
 import shutil
+from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
+auth = HTTPBasicAuth()
+
+MASTER_PASSWORD = "Montero25"
 
 # Configuración de registro
 logging.basicConfig(filename='backup_log.log', level=logging.ERROR,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-
+@auth.verify_password
+def verify_password(username, password):
+    return password == MASTER_PASSWORD
 """
 Routas de la aplicación
 """
 
 
 @app.route('/')
+@auth.login_required
 def index():
     backups = get_backups_list()
     message = request.args.get('message', None)
@@ -29,6 +36,7 @@ def index():
 
 
 @app.route('/restore/<backup_file>')
+@auth.login_required
 def restore(backup_file):
     data = load_config()
     local_url = data['local_url']
@@ -63,6 +71,7 @@ def restore(backup_file):
 
 
 @app.route('/create_backup/')
+@auth.login_required
 def create_backup():
     data = load_config()
     admin_password = data['admin_password']
@@ -81,7 +90,7 @@ def create_backup():
         backup_files = glob.glob(
             f"{backup_dir}/{databases_to_backup}_backup_*.dump")
         backup_files.sort(key=os.path.getctime, reverse=True)
-        for old_backup in backup_files[3:]:
+        for old_backup in backup_files[8:]:
             if os.path.exists(old_backup):
                 os.remove(old_backup)
         return redirect(url_for('index', message='Se ha creado correctamente el backup'))
@@ -92,6 +101,7 @@ def create_backup():
 
 
 @app.route('/download_backup/<backup_file>')
+@auth.login_required
 def download_backup(backup_file):
     data = load_config()
     backup_dir = data['backup_dir']
@@ -99,6 +109,7 @@ def download_backup(backup_file):
 
 
 @app.route('/restart_odoo')
+@auth.login_required
 def restart_odoo():
     try:
         subprocess.run(
@@ -111,6 +122,7 @@ def restart_odoo():
 
 
 @app.route('/stop_odoo')
+@auth.login_required
 def stop_odoo():
     try:
         subprocess.run(['sudo', 'service', 'odoo-server', 'stop'], check=True)
@@ -122,6 +134,7 @@ def stop_odoo():
 
 
 @app.route('/start_odoo')
+@auth.login_required
 def start_odoo():
     try:
         subprocess.run(['sudo', 'service', 'odoo-server', 'start'], check=True)
@@ -151,13 +164,15 @@ def rename_local_folder(rename_to_backup=False):
             os.rename(local_folder + "/" + name_database, new_folder_name)
             return new_folder_name
         else:
-            new_folder_name = local_folder + "/" + name_database
+            new_folder_name = local_folder + "/" + name_database    
+            try:        
+                merge_folders(new_folder_name + backup_suffix, new_folder_name)
+            except Exception as e:
+                logging.error(f"Error al copiar la carpeta: {e}")
             try:
-                os.rename(local_folder + "/" + name_database, new_folder_name)   
-            except:
-                pass
-            merge_folders(new_folder_name + backup_suffix, new_folder_name)
-            shutil.rmtree(new_folder_name + backup_suffix)
+                shutil.rmtree(new_folder_name + backup_suffix)
+            except Exception as e:
+                logging.error(f"Error al borrar la carpeta: {e}")
             return new_folder_name
     except OSError as e:
         error_message = f"Error : {e}"
@@ -172,10 +187,16 @@ def merge_folders(source_folder, destination_folder):
 
         # Si el item es un archivo y no existe en el destino, copiarlo
         if os.path.isfile(source_item) and not os.path.exists(destination_item):
-            shutil.copy2(source_item, destination_item)
-            print(f"Copiado: {item}")
-            os.remove(source_item)  # Borrar el archivo del origen
-            print(f"Borrado de origen: {item}")
+            try:
+                shutil.copy2(source_item, destination_item)
+                print(f"Copiado: {item}")
+            except Exception as e:
+                logging.error(f"Error al copiar el archivo: {e}")
+            try:
+                os.remove(source_item)  # Borrar el archivo del origen
+                print(f"Borrado de origen: {item}")
+            except Exception as e:
+                logging.error(f"Error al borrar el archivo: {e}")
         else:
             print(
                 f"El archivo ya existe en destino o no es un archivo: {item}")
