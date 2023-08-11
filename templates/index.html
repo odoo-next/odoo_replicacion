@@ -127,7 +127,11 @@
                 {% endfor %}
             </tbody>
         </table>
-        <div class="mt-4 p-3 border rounded">
+
+
+        div class="mt-4 p-3 border rounded">
+    <div class="row">
+        <div class="col-md-4">
             <h2 class="mb-3">Sincronizar Módulos</h2>
             <div>
                 <a href="javascript:void(0);" class="btn btn-primary" id="syncModulosBtn"
@@ -139,11 +143,8 @@
                 <small>Sincroniza los módulos de Odoo desde el servidor de producción al servidor de respaldo. Esto asegura que los cambios y actualizaciones en los módulos estén reflejados en el entorno de respaldo.</small>
             </div>
         </div>
-        
 
-
-
-        <div class="mt-4 p-3 border rounded">
+        <div class="col-md-4">
             <h2 class="mb-3">Gestión de Odoo</h2>
             <div>
                 <a href="javascript:void(0);" class="btn btn-danger me-2" id="restartOdooBtn"
@@ -158,8 +159,7 @@
             </div>
         </div>
 
-
-        <div class="mt-4 p-3 border rounded">
+        <div class="col-md-4">
             <h2 class="mb-3">Crear Snapshot</h2>
             <div>
                 <a href="{{ url_for('create_snapshot') }}" class="btn btn-warning" id="createSnapshotBtn"
@@ -190,7 +190,7 @@
             </tbody>
         </table>
         <footer class="mt-5 text-center">
-            <p>Desarrollado por <a href="https://www.odoonext.com" target="_blank">OdooNext</a></p>
+            <p>Desarrollado por <a href="https://odoonext.com" target="_blank">OdooNext</a></p>
             <img src="{{ url_for('static', filename='odoonext_logo.png') }}" alt="OdooNext Logo" width="100">
         </footer>
     </div>
