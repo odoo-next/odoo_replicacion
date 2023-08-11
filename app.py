@@ -36,17 +36,21 @@ def restore(backup_file):
     backup_file = backup_dir+"/"+backup_file
     nameDB = data['name_database']
     rename_local_folder(rename_to_backup=True)  # Renombrar antes de restaurar
-
+    logging.info("Renobrado el filestore a filestore_backup")
     # Eliminar la base de datos
     drop_db_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={nameDB}' {local_url}/web/database/drop"
+    logging.info(f"Eliminando la base de datos {nameDB} con  el comando: {drop_db_command}")
     subprocess.run(drop_db_command, shell=True, check=True)
 
 
     restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={nameDB}' {local_url}/web/database/restore"   
 
     try:
+        logging.info(f"Restaurando la base de datos {nameDB} con el comando: {restore_command}")
         subprocess.run(restore_command, shell=True, check=True)
+        logging.info("Renobrado el filestore a filestore al nombre original")
         rename_local_folder(rename_to_backup=False)  # Renombrar después de restaurar y evitar traerme de vuelta todos los archivos del filestore
+        logging.info("Copiar la carpeta filestore_ del servidor remoto al servidor local")
         copy_folder()
         return redirect(url_for('index', message="Restauración iniciada con éxito."))
     except subprocess.CalledProcessError as e:
@@ -70,6 +74,7 @@ def create_backup():
     try:
         # Ejecutar el comando CURL para respaldar la base de datos
         backup_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={databases_to_backup}' -F 'backup_format=dump' -o {backup_dir}/{databases_to_backup}_backup_{datetime.now().strftime('%Y%m%d%H%M%S')}.dump {server_origin}"
+        logging.info("Ejecutando el comando CURL para respaldar la base de datos: "+backup_command)
         subprocess.run(backup_command, shell=True, check=True)
 
         # Eliminar los respaldos antiguos, manteniendo solo los 3 más recientes
@@ -189,7 +194,7 @@ def copy_folder():
         #sudo chown -R oodoo:odoo /odoo/.local/share
         chown_command = f"sudo chown -R odoo:odoo {local_folder}"
         subprocess.run(chown_command, shell=True, check=True)
-        print(f"Comando a ejecutar: rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}")
+        logging.info(f"Comando a ejecutar: rsync -avz --delete {server_user}@{server_ip}:{remote_folder} {local_folder}")
         return redirect(url_for('index', message= "Carpeta copiada exitosamente."))
     except subprocess.CalledProcessError as e:
         error_message = f"Error al copiar la carpeta: {e}"
