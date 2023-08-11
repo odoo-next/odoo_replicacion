@@ -39,6 +39,24 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .table {
+            font-size: 14px;
+        }
+
+        .table th {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .table td.actions {
+            white-space: nowrap;
+        }
+
     </style>
     <script>
         function confirmActionWithLoader(actionUrl, message, btnId, iconClass) {
