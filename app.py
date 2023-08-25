@@ -44,7 +44,7 @@ def restore(backup_file):
     backup_dir = data['backup_dir']
     backup_file = backup_dir+"/"+backup_file
     nameDB = data['name_database']
-    rename_local_folder(rename_to_backup=True)  # Renombrar antes de restaurar
+    #rename_local_folder(rename_to_backup=True)  # Renombrar antes de restaurar
     print("Renobrado el filestore a filestore_backup")
     # Eliminar la base de datos
     drop_db_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={nameDB}' {local_url}/web/database/drop"
@@ -60,7 +60,7 @@ def restore(backup_file):
         subprocess.run(restore_command, shell=True, check=True)
         print("Renobrado el filestore a filestore al nombre original")
         # Renombrar después de restaurar y evitar traerme de vuelta todos los archivos del filestore
-        rename_local_folder(rename_to_backup=False)
+        #rename_local_folder(rename_to_backup=False)
         print("Copiar la carpeta filestore_ del servidor remoto al servidor local")
         copy_folder()
         return redirect(url_for('index', message="Restauración iniciada con éxito."))
