@@ -50,7 +50,12 @@ def restore(backup_file):
     drop_db_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={nameDB}' {local_url}/web/database/drop"
     print(
         f"Eliminando la base de datos {nameDB} con  el comando: {drop_db_command}")
-    subprocess.run(drop_db_command, shell=True, check=True)
+
+    try:
+        subprocess.run(drop_db_command, shell=True, check=True)
+        print("Base de datos eliminada exitosamente")
+    except:
+        pass
 
     restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={nameDB}' {local_url}/web/database/restore"
 
