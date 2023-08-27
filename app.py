@@ -228,7 +228,7 @@ def restore_prod():
     local_url_backup = local_url+"/web/database/backup"
     server_url = data['server_url']
 
-    backup_file="backup_dir}/{databases_to_backup}_backup_local_{datetime.now().strftime('%Y%m%d%H%M%S').zip"
+    backup_file=f"{backup_dir}/{databases_to_backup}_backup_local_{datetime.now().strftime('%Y%m%d%H%M%S')}.zip"
 
     try:
         #1 crear backup del servidor de respaldo local
