@@ -252,6 +252,12 @@ def restore_prod():
         except:
             pass
 
+        # hacer un get a/web/database/manager
+        try:
+            subprocess.run(f"curl -X GET {server_url}/web/database/manager", shell=True, check=True)     
+        except:
+            pass
+
         restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={databases_to_backup}' {server_url}/web/database/restore"
         print(
             f"Restaurando la base de datos {databases_to_backup} con el comando: {restore_command}")
