@@ -8,11 +8,17 @@ import glob
 from datetime import datetime
 import logging
 import shutil
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+import time
+
+
 from flask_httpauth import HTTPBasicAuth
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 
 MASTER_PASSWORD = "Montero25"
+MASTER_PASSWORD_RESTORE = "SI"
 
 # Configuración de registro
 logging.basicConfig(filename='backup_log.log', level=logging.ERROR,
@@ -201,7 +207,61 @@ def create_snapshot():
         return redirect(url_for('index', error_message=error_message))
 
 
+@app.route('/restore_prod/<backup_file>', methods=['GET', 'POST'])
+@auth.login_required
+def restore_prod(backup_file):
+    if request.method == 'POST':
+        master_password = request.form.get('master_password')
+        if master_password != MASTER_PASSWORD_RESTORE:
+            return redirect(url_for('index', error_message="Contraseña maestra incorrecta."))
 
+        # Resto del código de restauración aquí
+
+    data = load_config()
+    #1 crear backup del servidor de respaldo local
+    #2 restaurar la base de datos del servidor de respaldo local al servidor de produccion
+    #3 copiar la carpeta filestore_ del servidor remoto al servidor local
+    admin_password = data['admin_password']
+    backup_dir = data['backup_dir']
+    databases_to_backup = data['databases_to_backup']
+    local_url = data['local_url']
+    local_url_backup = local_url+"/web/database/backup"
+    server_url = data['server_url']
+
+    backup_file="backup_dir}/{databases_to_backup}_backup_local_{datetime.now().strftime('%Y%m%d%H%M%S').zip"
+
+    try:
+        #1 crear backup del servidor de respaldo local
+        backup_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={databases_to_backup}' -F 'backup_format=zip' -o {backup_file} {local_url_backup}"
+        print("Ejecutando el comando CURL para respaldar la base de datos: "+backup_command)
+        subprocess.run(backup_command, shell=True, check=True)
+    except Exception as e:
+        error_message = f"Error al respaldar la base de datos {databases_to_backup}: {e}"
+        logging.error(error_message)
+        return redirect(url_for('index', error_message=f"Error al respaldar la base de datos {databases_to_backup}. Puede que la contraseña MASTER del Servidivor de Producción haya cambiado: {e}"))
+    
+    try:
+        #2 restaurar la base de datos del servidor de respaldo local al servidor de produccion
+        drop_db_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={databases_to_backup}' {server_url}/web/database/drop"
+        print(
+            f"Eliminando la base de datos {databases_to_backup} con  el comando: {drop_db_command}")
+
+        try:
+            subprocess.run(drop_db_command, shell=True, check=True)
+            print("Base de datos eliminada exitosamente")
+        except:
+            pass
+
+        restore_command = f"curl -F 'master_pwd={admin_password}' -F backup_file=@{backup_file} -F 'copy=true' -F 'name={databases_to_backup}' {server_url}/web/database/restore"
+        print(
+            f"Restaurando la base de datos {databases_to_backup} con el comando: {restore_command}")
+        subprocess.run(restore_command, shell=True, check=True)
+    except Exception as e:
+        error_message = f"Error al restaurar la base de datos: {e}"
+        logging.error(error_message)
+        return redirect(url_for('index', error_message=f"Error al restaurar la base de datos: {e}"))
+        
+    return redirect(url_for('index', message="Restauración en Producción con éxito."))
 
 
 """
@@ -341,6 +401,19 @@ def load_config(config_file='config.ini'):
     except configparser.Error as e:
         raise ValueError(f"Error al cargar la configuración: {e}")
 
+# Crear el planificador
+scheduler = BackgroundScheduler()
+
+# Agregar la tarea de respaldo cada 2 horas
+scheduler.add_job(
+    create_backup,
+    IntervalTrigger(hours=2),
+    id='backup_job',
+    max_instances=1  # Evitar múltiples instancias simultáneas
+)
+
+# Iniciar el planificador
+scheduler.start()
 
 if __name__ == '__main__':
     data = load_config()
