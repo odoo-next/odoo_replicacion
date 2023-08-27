@@ -209,7 +209,7 @@ def create_snapshot():
 
 @app.route('/restore_prod', methods=['GET', 'POST'])
 @auth.login_required
-def restore_prod(backup_file):
+def restore_prod():
     if request.method == 'POST':
         master_password = request.form.get('master_password')
         if master_password != MASTER_PASSWORD_RESTORE:
