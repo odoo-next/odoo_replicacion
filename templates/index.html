@@ -155,9 +155,9 @@
             <div class="row">
                 <div class="col-md-4">
                     <td>
-                        <a href="javascript:void(0);" class="btn btn-danger btn-sm" id="restoreBackupBtn{{ loop.index }}"
-                            data-bs-toggle="modal" data-bs-target="#confirmRestoreModal{{ loop.index }}">
-                            <i class="bi bi-box-arrow-in-down"></i> Restaurar
+                        <a href="javascript:void(0);" class="btn btn-danger btn-sm" id="restoreBackupBtnProd"
+                            data-bs-toggle="modal" data-bs-target="#confirmRestoreModal">
+                            <i class="bi bi-box-arrow-in-down"></i> Restaurar a Producción
                         </a>
                     </td>
                 </div>
@@ -239,7 +239,7 @@
             </tbody>
         </table>
 
-        <div class="modal fade" id="confirmRestoreModal{{ loop.index }}" tabindex="-1" aria-labelledby="confirmRestoreModalLabel" aria-hidden="true">
+        <div class="modal fade" id="confirmRestoreModal" tabindex="-1" aria-labelledby="confirmRestoreModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -248,11 +248,11 @@
                     </div>
                     <div class="modal-body">
                         <p>Estás a punto de restaurar la base de datos desde este backup. Esta acción reemplazará los datos actuales en el servidor de producción. Ingresa la contraseña maestra para confirmar:</p>
-                        <input type="password" class="form-control mb-3" id="masterPasswordInput{{ loop.index }}" placeholder="Contraseña maestra">
+                        <input type="password" class="form-control mb-3" id="masterPasswordInput" placeholder="Contraseña maestra">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-danger" onclick="confirmRestore('{{ url_for('restore_prod') }}', 'masterPasswordInput{{ loop.index }}')">Aceptar</button>
+                        <button type="button" class="btn btn-danger" onclick="confirmRestore('{{ url_for('restore_prod') }}', 'masterPasswordInput')">Aceptar</button>
                     </div>
                 </div>
             </div>
