@@ -388,8 +388,9 @@ def copy_folder():
         return redirect(url_for('index', message=f"Error al copiar la carpeta: {e}"))
 
 
-def load_config(config_file='config.ini'):
+def load_config():
     config = configparser.ConfigParser()
+    config_file= os.path.join(os.path.dirname(__file__), 'config.ini')
 
     try:
         config.read(config_file)
