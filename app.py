@@ -256,6 +256,8 @@ def restore_prod():
         print(
             f"Restaurando la base de datos {databases_to_backup} con el comando: {restore_command}")
         subprocess.run(restore_command, shell=True, check=True)
+        #Eliminar el backup local
+        os.remove(backup_file)
     except Exception as e:
         error_message = f"Error al restaurar la base de datos: {e}"
         logging.error(error_message)
