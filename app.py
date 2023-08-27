@@ -207,7 +207,7 @@ def create_snapshot():
         return redirect(url_for('index', error_message=error_message))
 
 
-@app.route('/restore_prod/<backup_file>', methods=['GET', 'POST'])
+@app.route('/restore_prod', methods=['GET', 'POST'])
 @auth.login_required
 def restore_prod(backup_file):
     if request.method == 'POST':
