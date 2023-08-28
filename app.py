@@ -8,8 +8,6 @@ import glob
 from datetime import datetime
 import logging
 import shutil
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
 import time
 
 
@@ -409,20 +407,6 @@ def load_config():
         return data
     except configparser.Error as e:
         raise ValueError(f"Error al cargar la configuración: {e}")
-
-# Crear el planificador
-scheduler = BackgroundScheduler()
-
-# Agregar la tarea de respaldo cada 2 horas
-scheduler.add_job(
-    create_backup,
-    IntervalTrigger(hours=2),
-    id='backup_job',
-    max_instances=1  # Evitar múltiples instancias simultáneas
-)
-
-# Iniciar el planificador
-scheduler.start()
 
 if __name__ == '__main__':
     data = load_config()
