@@ -8,6 +8,8 @@ import glob
 from datetime import datetime
 import logging
 import shutil
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 import time
 
 
@@ -82,31 +84,14 @@ def restore(backup_file):
 @app.route('/create_backup/')
 @auth.login_required
 def create_backup():
-    data = load_config()
-    admin_password = data['admin_password']
-    backup_dir = data['backup_dir']
-    databases_to_backup = data['databases_to_backup']
-    server_origin = data['server_url']
-    server_origin = server_origin+"/web/database/backup"
-
-    try:
-        # Ejecutar el comando CURL para respaldar la base de datos
-        backup_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={databases_to_backup}' -F 'backup_format=dump' -o {backup_dir}/{databases_to_backup}_backup_{datetime.now().strftime('%Y%m%d%H%M%S')}.dump {server_origin}"
-        print("Ejecutando el comando CURL para respaldar la base de datos: "+backup_command)
-        subprocess.run(backup_command, shell=True, check=True)
-
-        # Eliminar los respaldos antiguos, manteniendo solo los 3 más recientes
-        backup_files = glob.glob(
-            f"{backup_dir}/{databases_to_backup}_backup_*.dump")
-        backup_files.sort(key=os.path.getctime, reverse=True)
-        for old_backup in backup_files[8:]:
-            if os.path.exists(old_backup):
-                os.remove(old_backup)
-        return redirect(url_for('index', message='Se ha creado correctamente el backup'))
-    except subprocess.CalledProcessError as e:
-        error_message = f"Error al respaldar la base de datos {databases_to_backup}: {e}"
-        logging.error(error_message)
-        return redirect(url_for('index', error_message=f"Error al respaldar la base de datos {databases_to_backup}: {e}"))
+        data = load_config()
+        databases_to_backup = data['databases_to_backup']
+        if create_backup_util():
+            return redirect(url_for('index', message='Se ha creado correctamente el backup'))
+        else:
+            error_message = f"Error al respaldar la base de datos {databases_to_backup}"
+            logging.error(error_message)
+            return redirect(url_for('index', error_message=f"Error al respaldar la base de datos {databases_to_backup}"))
 
 
 @app.route('/download_backup/<backup_file>')
@@ -274,6 +259,31 @@ def restore_prod():
 Metodos Auxiliares
 """
 
+def create_backup_util():
+    data = load_config()
+    admin_password = data['admin_password']
+    backup_dir = data['backup_dir']
+    databases_to_backup = data['databases_to_backup']
+    server_origin = data['server_url']
+    server_origin = server_origin+"/web/database/backup"
+
+    try:
+        # Ejecutar el comando CURL para respaldar la base de datos
+        backup_command = f"curl -X POST -F 'master_pwd={admin_password}' -F 'name={databases_to_backup}' -F 'backup_format=dump' -o {backup_dir}/{databases_to_backup}_backup_{datetime.now().strftime('%Y%m%d%H%M%S')}.dump {server_origin}"
+        print("Ejecutando el comando CURL para respaldar la base de datos: "+backup_command)
+        subprocess.run(backup_command, shell=True, check=True)
+
+        # Eliminar los respaldos antiguos, manteniendo solo los 3 más recientes
+        backup_files = glob.glob(
+            f"{backup_dir}/{databases_to_backup}_backup_*.dump")
+        backup_files.sort(key=os.path.getctime, reverse=True)
+        for old_backup in backup_files[12:]:
+            if os.path.exists(old_backup):
+                os.remove(old_backup)
+        return True
+    except Exception as e:
+        return False
+
 def get_snapshots_list(local_snapshot_dir):
     snapshot_files = glob.glob(os.path.join(local_snapshot_dir, 'snapshot_*.zip'))
 
@@ -407,6 +417,20 @@ def load_config():
         return data
     except configparser.Error as e:
         raise ValueError(f"Error al cargar la configuración: {e}")
+
+# Crear el planificador
+scheduler = BackgroundScheduler()
+
+# Agregar la tarea de respaldo cada 2 horas
+scheduler.add_job(
+    create_backup_util,
+    IntervalTrigger(hours=30),
+    id='backup_job',
+    max_instances=1  # Evitar múltiples instancias simultáneas
+)
+
+# Iniciar el planificador
+scheduler.start()
 
 if __name__ == '__main__':
     data = load_config()
