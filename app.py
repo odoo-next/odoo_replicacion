@@ -426,7 +426,7 @@ scheduler = BackgroundScheduler()
 # Agregar la tarea de respaldo cada 2 horas
 scheduler.add_job(
     create_backup_util,
-    IntervalTrigger(minutes=20),
+    IntervalTrigger(hours=1),
     id='backup_job',
     max_instances=1  # Evitar múltiples instancias simultáneas
 )
