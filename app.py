@@ -280,8 +280,10 @@ def create_backup_util():
         for old_backup in backup_files[12:]:
             if os.path.exists(old_backup):
                 os.remove(old_backup)
+        logging.info("Respaldo creado exitosamente")
         return True
     except Exception as e:
+        logging.error("Error al respaldar la base de datos: "+str(e))
         return False
 
 def get_snapshots_list(local_snapshot_dir):
@@ -424,7 +426,7 @@ scheduler = BackgroundScheduler()
 # Agregar la tarea de respaldo cada 2 horas
 scheduler.add_job(
     create_backup_util,
-    IntervalTrigger(hours=30),
+    IntervalTrigger(minutes=20),
     id='backup_job',
     max_instances=1  # Evitar múltiples instancias simultáneas
 )
