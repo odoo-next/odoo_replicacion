@@ -277,7 +277,7 @@ def create_backup_util():
         backup_files = glob.glob(
             f"{backup_dir}/{databases_to_backup}_backup_*.dump")
         backup_files.sort(key=os.path.getctime, reverse=True)
-        for old_backup in backup_files[12:]:
+        for old_backup in backup_files[20:]:
             if os.path.exists(old_backup):
                 os.remove(old_backup)
         logging.info("Respaldo creado exitosamente")
@@ -426,7 +426,7 @@ scheduler = BackgroundScheduler()
 # Agregar la tarea de respaldo cada 2 horas
 scheduler.add_job(
     create_backup_util,
-    IntervalTrigger(hours=1),
+    IntervalTrigger(hours=2),
     id='backup_job',
     max_instances=1  # Evitar múltiples instancias simultáneas
 )
