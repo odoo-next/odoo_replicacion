@@ -415,6 +415,7 @@ def load_config():
             'server_ip': config.get('Server', 'ServerIP'),
             'server_folder': config.get('Server', 'ServerFolder'),
             'name_database': config.get('Server', 'NameDataBase'),
+            'server_admin_password': config.get('Server', 'ServerAdminPassword'),
         }
         return data
     except configparser.Error as e:
